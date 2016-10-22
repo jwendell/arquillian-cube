@@ -4,6 +4,7 @@ import io.fabric8.kubernetes.api.model.ContainerState;
 import io.fabric8.kubernetes.api.model.ContainerStateWaiting;
 import io.fabric8.kubernetes.api.model.ContainerStatus;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodCondition;
 import io.fabric8.kubernetes.api.model.PodStatus;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.arquillian.cube.kubernetes.api.Session;
@@ -14,6 +15,7 @@ import java.util.concurrent.Callable;
 public class SessionPodsAreReady implements Callable<Boolean> {
 
     private static final String RUNNING_PHASE = "Running";
+    private static final String READY_CONDITION = "Ready";
 
     private final Session session;
     private final KubernetesClient kubernetesClient;
@@ -45,9 +47,13 @@ public class SessionPodsAreReady implements Callable<Boolean> {
                             ContainerStateWaiting waiting = state.getWaiting();
                             String containerName = containerStatus.getName();
                             if (waiting != null) {
-                                session.getLogger().warn("Waiting for container:" + containerName + ". Reason:" + waiting.getReason());
+                                session.getLogger().warn("Waiting for container: " + containerName + ". Reason: " + waiting.getReason());
                             } else {
-                                session.getLogger().warn("Waiting for container:" + containerName + ".");
+                                 if (!isConditionReady(pod)) {
+                                     session.getLogger().warn("Waiting for container: " + containerName + ". Reason: Waiting for readiness");
+                                 } else {
+                                     session.getLogger().warn("Waiting for container: " + containerName + ".");
+                                 }
                             }
                         }
                     }
@@ -62,12 +68,23 @@ public class SessionPodsAreReady implements Callable<Boolean> {
             return false;
         }
 
-
         String phase = pod.getStatus().getPhase();
-        if (RUNNING_PHASE.equalsIgnoreCase(phase)) {
-            return true;
+        if (!RUNNING_PHASE.equalsIgnoreCase(phase)) {
+            return false;
         }
-        return false;
+
+        return isConditionReady(pod);
     }
 
+    private static boolean isConditionReady(Pod pod) {
+        for (PodCondition condition : pod.getStatus().getConditions()) {
+            if (condition.getType().equalsIgnoreCase(READY_CONDITION)) {
+                if (Boolean.valueOf(condition.getStatus())) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 }
