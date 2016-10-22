@@ -1,8 +1,6 @@
 package org.arquillian.cube.kubernetes.impl.namespace;
 
-import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClientException;
 import org.arquillian.cube.kubernetes.api.Configuration;
 import org.arquillian.cube.kubernetes.api.LabelProvider;
 import org.arquillian.cube.kubernetes.api.Logger;
@@ -36,23 +34,23 @@ public class DefaultNamespaceService implements NamespaceService {
     Instance<Configuration> configuration;
 
     @Override
-    public Namespace create(String namespace) {
-        return client.get().namespaces().createNew().withNewMetadata()
-                .withName(namespace)
-                .addToLabels(labelProvider.get().getLabels())
-                .addToLabels(PROJECT_LABEL, client.get().getNamespace())
-                .addToLabels(FRAMEWORK_LABEL, ARQUILLIAN_FRAMEWORK)
-                .addToLabels(COMPONENT_LABEL, ITEST_COMPONENT)
-                .endMetadata()
-                .done();
+    public void create(String namespace) {
+        client.get().namespaces().createNew().withNewMetadata()
+            .withName(namespace)
+            .addToLabels(labelProvider.get().getLabels())
+            .addToLabels(PROJECT_LABEL, client.get().getNamespace())
+            .addToLabels(FRAMEWORK_LABEL, ARQUILLIAN_FRAMEWORK)
+            .addToLabels(COMPONENT_LABEL, ITEST_COMPONENT)
+            .endMetadata()
+            .done();
     }
 
     @Override
-    public Namespace annotate(String namespace, Map<String, String> annotations) {
-        return client.get().namespaces().withName(namespace).edit()
-                .editMetadata()
-                .addToAnnotations(annotations)
-                .endMetadata().done();
+    public void annotate(String namespace, Map<String, String> annotations) {
+        client.get().namespaces().withName(namespace).edit()
+            .editMetadata()
+            .addToAnnotations(annotations)
+            .endMetadata().done();
     }
 
     @Override

@@ -9,17 +9,15 @@ public interface NamespaceService {
     /**
      * Creates a {@link Namespace} with the specified name.
      * @param namespace The name of the {@link Namespace}.
-     * @return          The created {@link Namespace}.
      */
-    Namespace create(String namespace);
+    void create(String namespace);
 
     /**
      * Adds the specified annotations to the {@link Namespace}.
      * @param namespace     The {@link Namespace} to annotate.
      * @param annotations   A map containing the annotations.
-     * @return              The annotated {@link Namespace}.
      */
-    Namespace annotate(String namespace, Map<String, String> annotations);
+    void annotate(String namespace, Map<String, String> annotations);
 
     /**
      * Deletes the specified {@link Namespace}.
