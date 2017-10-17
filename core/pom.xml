@@ -104,6 +104,12 @@
       <artifactId>arquillian-cube-requirement</artifactId>
       <scope>provided</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.jboss</groupId>
+      <artifactId>jboss-dmr</artifactId>
+    </dependency>
+  
   </dependencies>
 
 </project>

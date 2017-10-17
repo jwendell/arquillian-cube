@@ -3,6 +3,7 @@ package org.arquillian.cube.impl.util;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -82,5 +83,24 @@ public class ConfigUtil {
             }
         }
         return urls.toArray(new URL[urls.size()]);
+    }
+
+    /**
+     * Converts a key-value comma separated list like "key1=value1,key2=value2" into a map.
+     * @param string
+     *     The list in a string form
+     * @return
+     *     A map containing the keys and values
+     */
+    public static Map<String, String> splitKeyValueList(String string) {
+        Map<String, String> labels = new HashMap<>();
+        if (string != null && string.length() > 0) {
+            String[] split = string.split(",");
+            for (String s : split) {
+                String[] ss = s.split("=");
+                labels.put(ss[0], ss[1]);
+            }
+        }
+        return labels;
     }
 }

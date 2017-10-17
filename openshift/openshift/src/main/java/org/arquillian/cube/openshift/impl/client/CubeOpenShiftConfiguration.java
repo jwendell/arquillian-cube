@@ -1,28 +1,27 @@
 package org.arquillian.cube.openshift.impl.client;
 
-import io.fabric8.kubernetes.clnt.v2_6.Config;
-import io.fabric8.kubernetes.clnt.v2_6.ConfigBuilder;
-import io.sundr.builder.annotations.Buildable;
-import io.sundr.builder.annotations.BuildableReference;
-import org.arquillian.cube.impl.util.Strings;
-import org.arquillian.cube.kubernetes.impl.DefaultConfiguration;
+import static org.arquillian.cube.impl.util.ConfigUtil.asURL;
+import static org.arquillian.cube.impl.util.ConfigUtil.getBooleanProperty;
+import static org.arquillian.cube.impl.util.ConfigUtil.getIntProperty;
+import static org.arquillian.cube.impl.util.ConfigUtil.getLongProperty;
+import static org.arquillian.cube.impl.util.ConfigUtil.getStringProperty;
+import static org.arquillian.cube.impl.util.ConfigUtil.splitKeyValueList;
 
-import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.arquillian.cube.impl.util.ConfigUtil.asURL;
-import static org.arquillian.cube.impl.util.ConfigUtil.getBooleanProperty;
-import static org.arquillian.cube.impl.util.ConfigUtil.getIntProperty;
-import static org.arquillian.cube.impl.util.ConfigUtil.getLongProperty;
-import static org.arquillian.cube.impl.util.ConfigUtil.getStringProperty;
+import org.arquillian.cube.impl.util.Strings;
+import org.arquillian.cube.kubernetes.impl.DefaultConfiguration;
+
+import io.fabric8.kubernetes.clnt.v2_6.Config;
+import io.fabric8.kubernetes.clnt.v2_6.ConfigBuilder;
+import io.sundr.builder.annotations.Buildable;
+import io.sundr.builder.annotations.BuildableReference;
 
 @Buildable(builderPackage = "io.fabric8.kubernetes.api.builder.v2_6", generateBuilderPackage = false, editableEnabled = false, refs = {
     @BuildableReference(DefaultConfiguration.class)
@@ -45,6 +44,10 @@ public class CubeOpenShiftConfiguration extends DefaultConfiguration {
     private static final String ROUTER_HOST = "routerHost";
     private static final String OPENSHIFT_ROUTER_HTTP_PORT = "openshiftRouterHttpPort";
     private static final String OPENSHIFT_ROUTER_HTTPS_PORT = "openshiftRouterHttpsPort";
+    private static final String TEMPLATE_URL = "template.url";
+    private static final String TEMPLATE_LABELS = "template.labels";
+    private static final String TEMPLATE_PARAMETERS = "template.parameters";
+    private static final String TEMPLATE_PROCESS = "template.process";
 
     private final boolean keepAliveGitServer;
     private final String definitions;
@@ -56,6 +59,10 @@ public class CubeOpenShiftConfiguration extends DefaultConfiguration {
     private final int openshiftRouterHttpPort;
     private final int openshiftRouterHttpsPort;
     private final boolean enableImageStreamDetection;
+    private final String templateURL;
+    private final String templateLabels;
+    private final String templateParameters;
+    private final boolean templateProcess;
 
     public CubeOpenShiftConfiguration(String sessionId, URL masterUrl, String namespace, Map<String, String> scriptEnvironmentVariables, URL environmentSetupScriptUrl,
                                       URL environmentTeardownScriptUrl, URL environmentConfigUrl, List<URL> environmentDependencies,
@@ -65,7 +72,8 @@ public class CubeOpenShiftConfiguration extends DefaultConfiguration {
                                       List<String> waitForServiceList, boolean ansiLoggerEnabled, boolean environmentInitEnabled, boolean logCopyEnabled,
                                       String logPath, String kubernetesDomain, String dockerRegistry, boolean keepAliveGitServer, String definitions,
                                       String definitionsFile, String[] autoStartContainers, Set<String> proxiedContainerPorts,
-                                      String portForwardBindAddress, String routerHost, int openshiftRouterHttpPort, int openshiftRouterHttpsPort, boolean enableImageStreamDetection) {
+                                      String portForwardBindAddress, String routerHost, int openshiftRouterHttpPort, int openshiftRouterHttpsPort, boolean enableImageStreamDetection,
+                                      String templateURL, String templateLabels, String templateParameters, boolean templateProcess) {
         super(sessionId, masterUrl, namespace, scriptEnvironmentVariables, environmentSetupScriptUrl, environmentTeardownScriptUrl,
             environmentConfigUrl, environmentDependencies, namespaceLazyCreateEnabled, namespaceCleanupEnabled,
             namespaceCleanupTimeout, namespaceCleanupConfirmationEnabled, namespaceDestroyEnabled,
@@ -81,6 +89,10 @@ public class CubeOpenShiftConfiguration extends DefaultConfiguration {
         this.openshiftRouterHttpPort = openshiftRouterHttpPort;
         this.openshiftRouterHttpsPort = openshiftRouterHttpsPort;
         this.enableImageStreamDetection = enableImageStreamDetection;
+        this.templateURL = templateURL;
+        this.templateLabels = templateLabels;
+        this.templateParameters = templateParameters;
+        this.templateProcess = templateProcess;
     }
 
     private static String[] split(String str, String regex) {
@@ -154,6 +166,10 @@ public class CubeOpenShiftConfiguration extends DefaultConfiguration {
                 .withOpenshiftRouterHttpPort(getIntProperty(OPENSHIFT_ROUTER_HTTP_PORT, Optional.of("openshift.router.httpPort"), map, 80))
                 .withOpenshiftRouterHttpsPort(getIntProperty(OPENSHIFT_ROUTER_HTTPS_PORT, Optional.of("openshift.router.httpsPort"), map, 443))
                 .withEnableImageStreamDetection(getBooleanProperty(ENABLE_IMAGE_STREAM_DETECTION, map, true))
+                .withTemplateURL(getStringProperty(TEMPLATE_URL, map, null))
+                .withTemplateLabels(getStringProperty(TEMPLATE_LABELS, map, null))
+                .withTemplateParameters(getStringProperty(TEMPLATE_PARAMETERS, map, null))
+                .withTemplateProcess(getBooleanProperty(TEMPLATE_PROCESS, map, true))
                 .build();
         } catch (Throwable t) {
             if (t instanceof RuntimeException) {
@@ -216,5 +232,29 @@ public class CubeOpenShiftConfiguration extends DefaultConfiguration {
 
     public boolean isEnableImageStreamDetection() {
         return enableImageStreamDetection;
+    }
+
+    public String getTemplateURL() {
+        return templateURL;
+    }
+
+    public String getTemplateLabels() {
+        return templateLabels;
+    }
+
+    public Map<String, String> getTemplateLabelsMap() {
+        return splitKeyValueList(templateLabels);
+    }
+
+    public String getTemplateParameters() {
+        return templateParameters;
+    }
+
+    public Map<String, String> getTemplateParametersMap() {
+        return splitKeyValueList(templateParameters);
+    }
+
+    public boolean isTemplateProcess() {
+        return templateProcess;
     }
 }

@@ -81,6 +81,7 @@
     <version.restassured>3.0.3</version.restassured>
     <version.jgit>4.5.0.201609210915-r</version.jgit>
     <version.systemrules>1.16.0</version.systemrules>
+    <version.dmr>1.4.1.Final</version.dmr>
   </properties>
 
   <dependencyManagement>
@@ -285,6 +286,12 @@
         <groupId>io.undertow</groupId>
         <artifactId>undertow-core</artifactId>
         <version>${version.undertow}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss</groupId>
+        <artifactId>jboss-dmr</artifactId>
+        <version>${version.dmr}</version>
       </dependency>
 
     </dependencies>

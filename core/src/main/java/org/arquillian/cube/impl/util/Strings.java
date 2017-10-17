@@ -5,6 +5,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
+
+import org.jboss.dmr.ValueExpression;
+import org.jboss.dmr.ValueExpressionResolver;
 
 public final class Strings {
 
@@ -64,5 +68,14 @@ public final class Strings {
             }
         }
         return answer;
+    }
+
+    public static StringResolver createStringResolver(Properties properties) {
+        final ValueExpressionResolver resolver = new CustomValueExpressionResolver(properties);
+        return new StringResolver() {
+            public String resolve(String value) {
+                return new ValueExpression(value).resolveString(resolver);
+            }
+        };
     }
 }
